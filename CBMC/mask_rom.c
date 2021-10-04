@@ -5,7 +5,18 @@ sw/device/rom_ext/docs/manifest.md
 sw/device/mask_rom/mask_rom.c
 sw/device/mask_rom/docs/index.md
 doc/security/specs/secure_boot/index.md
+
+
+Run commands:
+
+WIPE ATTACK with RSA_SIZE = 5 (SPEEDS UP VERIFICAITON) (note. remember to set in mask_rom.h)
+cbmc mask_rom.c memory_compare.c --function PROOF_HARNESS --unwind 33 --unwindset memcmp.0:25 --unwindset mask_rom_boot.0:2 --unwindset PROOF_HARNESS.0:2 --unwinding-assertions --pointer-check --bounds-check
+
+WIPE ATTACK with RSA_SIZE = 96) (note. remember to set in mask_rom.h)
+cbmc mask_rom.c memory_compare.c --function PROOF_HARNESS --unwind 97 --unwindset cmp_key.0:390 --unwindset cmp_image_len.0:5 --unwindset cmp_image_code.0:3 --unwindset cmp_modulus.0:385 --unwindset cmp_signature.0:385 --unwindset cmp_has_decrypt.0:33 --unwindset mask_rom_boot.0:2 --unwindset PROOF_HARNESS.0:2 --unwinding-assertions --pointer-check --bounds-check --object-bits 9
 */
+
+
 
 #include "hmac.h"
 #include "mask_rom.h"
@@ -630,24 +641,6 @@ void PROOF_HARNESS() {
   }
   __REACHABILITY_CHECK
 }
-
-/*
-PROPERTY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 (mocked hmac)
-
-RSA_SIZE = 96
-Run:
-cbmc mask_rom.c mock_hmac.c memory_compare.c --function PROOF_HARNESS --unwind 97 --unwindset cmp_key.0:390 --unwindset cmp_image_len.0:5 --unwindset cmp_image_code.0:3 --unwindset cmp_modulus.0:385 --unwindset cmp_signature.0:385 --unwindset cmp_has_decrypt.0:33 --unwindset mask_rom_boot.0:2 --unwindset PROOF_HARNESS.0:2 --unwinding-assertions --pointer-check --bounds-check --object-bits 9
-
-RSA_SIZE = 5 (SPEEDS UP VERIFICAITON) (note. remember to set in mask_rom.h)
-Run: 
-cbmc mask_rom.c mock_hmac.c memory_compare.c --function PROOF_HARNESS --unwind 33 --unwindset memcmp.0:25 --unwindset mask_rom_boot.0:2 --unwindset PROOF_HARNESS.0:2 --unwinding-assertions --pointer-check --bounds-check
-
-
-PROPERTY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
-RSA_SIZE = 96
-Run: 
-cbmc mask_rom.c hmac.c memory_compare.c --function PROOF_HARNESS --unwind 97 --unwindset cmp_key.0:390 --unwindset cmp_image_len.0:5 --unwindset cmp_image_code.0:3 --unwindset cmp_modulus.0:385 --unwindset cmp_signature.0:385 --unwindset cmp_has_decrypt.0:33 --unwindset mask_rom_boot.0:2 --unwindset HMAC_SHA2_256_update.0:431 --unwindset PROOF_HARNESS.0:2 --unwinding-assertions --pointer-check --bounds-check --object-bits 9
-*/
 
 
 void mask_rom_boot(boot_policy_t boot_policy, rom_exts_manifests_t rom_exts_to_try ){
